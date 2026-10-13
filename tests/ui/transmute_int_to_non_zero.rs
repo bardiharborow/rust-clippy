@@ -134,6 +134,31 @@ mod shadowed {
     }
 }
 
+#[clippy::msrv = "1.78"]
+mod msrv_before_generic_non_zero {
+    use std::num::{NonZeroI8, NonZeroU32};
+
+    fn f(x: u32, y: i8, z: usize) {
+        let _: NonZeroU32 = unsafe { std::mem::transmute(x) };
+        //~^ transmute_int_to_non_zero
+        let _: NonZeroI8 = unsafe { std::mem::transmute(y) };
+        //~^ transmute_int_to_non_zero
+        // `NonZeroUsize` is not in scope, so the suggestion must use a full path
+        let _: std::num::NonZeroUsize = unsafe { std::mem::transmute(z) };
+        //~^ transmute_int_to_non_zero
+    }
+}
+
+#[clippy::msrv = "1.79"]
+mod msrv_generic_non_zero {
+    use std::num::NonZeroU32;
+
+    fn f(x: u32) -> NonZeroU32 {
+        unsafe { std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+}
+
 mod local_std {
     // This `std` is not the crate, so the suggestion must use an absolute path
     #[allow(dead_code)]

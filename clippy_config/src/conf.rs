@@ -734,6 +734,7 @@ define_Conf! {
         seek_from_current,
         swap_ptr_to_ref,
         to_digit_is_some,
+        transmute_int_to_non_zero,
         transmute_ptr_to_ref,
         tuple_array_conversions,
         type_repetition_in_bounds,

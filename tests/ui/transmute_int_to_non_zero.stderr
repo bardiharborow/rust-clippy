@@ -110,10 +110,22 @@ LL |         unsafe { std::mem::transmute(x) }
    |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
-  --> tests/ui/transmute_int_to_non_zero.rs:143:18
+  --> tests/ui/transmute_int_to_non_zero.rs:142:38
    |
-LL |         unsafe { ::std::mem::transmute(x) }
-   |                  ^^^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
+LL |         let _: NonZeroU32 = unsafe { std::mem::transmute(x) };
+   |                                      ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `NonZeroU32::new_unchecked(x)`
+
+error: transmute from a `i8` to a `NonZero<i8>`
+  --> tests/ui/transmute_int_to_non_zero.rs:144:37
+   |
+LL |         let _: NonZeroI8 = unsafe { std::mem::transmute(y) };
+   |                                     ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `NonZeroI8::new_unchecked(y)`
+
+error: transmute from a `usize` to a `NonZero<usize>`
+  --> tests/ui/transmute_int_to_non_zero.rs:147:50
+   |
+LL |         let _: std::num::NonZeroUsize = unsafe { std::mem::transmute(z) };
+   |                                                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZeroUsize::new_unchecked(z)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:157:18
@@ -121,5 +133,17 @@ error: transmute from a `u32` to a `NonZero<u32>`
 LL |         unsafe { std::mem::transmute(x) }
    |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
-error: aborting due to 20 previous errors
+error: transmute from a `u32` to a `NonZero<u32>`
+  --> tests/ui/transmute_int_to_non_zero.rs:168:18
+   |
+LL |         unsafe { ::std::mem::transmute(x) }
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
+
+error: transmute from a `u32` to a `NonZero<u32>`
+  --> tests/ui/transmute_int_to_non_zero.rs:182:18
+   |
+LL |         unsafe { std::mem::transmute(x) }
+   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
+
+error: aborting due to 24 previous errors
 

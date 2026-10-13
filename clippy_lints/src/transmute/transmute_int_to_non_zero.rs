@@ -1,5 +1,6 @@
 use super::TRANSMUTE_INT_TO_NON_ZERO;
 use clippy_utils::diagnostics::span_lint_and_then;
+use clippy_utils::msrvs::{self, Msrv};
 use clippy_utils::std_or_core;
 use clippy_utils::sugg::Sugg;
 use rustc_errors::Applicability;
@@ -17,20 +18,32 @@ pub(super) fn check<'tcx>(
     from_ty: Ty<'tcx>,
     to_ty: Ty<'tcx>,
     arg: &'tcx Expr<'_>,
+    msrv: Msrv,
 ) -> bool {
-    if let ty::Int(_) | ty::Uint(_) = from_ty.kind()
-        && let ty::Adt(adt, substs) = to_ty.kind()
+    let int_name = match from_ty.kind() {
+        ty::Int(int_ty) => int_ty.name_str(),
+        ty::Uint(uint_ty) => uint_ty.name_str(),
+        _ => return false,
+    };
+    if let ty::Adt(adt, substs) = to_ty.kind()
         && cx.tcx.is_diagnostic_item(sym::NonZero, adt.did())
         && let int_ty = substs.type_at(0)
         && from_ty == int_ty
     {
+        // Before the generic `NonZero<T>` was stabilized, only the `NonZeroU32` etc. types existed.
+        let non_zero_name = if msrv.meets(cx, msrvs::GENERIC_NON_ZERO) {
+            sym::NonZero.to_string()
+        } else {
+            let (first, rest) = int_name.split_at(1);
+            format!("{}{}{rest}", sym::NonZero, first.to_uppercase())
+        };
         span_lint_and_then(
             cx,
             TRANSMUTE_INT_TO_NON_ZERO,
             e.span,
             format!("transmute from a `{from_ty}` to a `{}<{int_ty}>`", sym::NonZero),
             |diag| {
-                if let Some(non_zero_path) = type_path(cx, e, to_ty, sym::NonZero.as_str()) {
+                if let Some(non_zero_path) = type_path(cx, e, to_ty, &non_zero_name) {
                     let arg = Sugg::hir(cx, arg, "..");
                     diag.span_suggestion(
                         e.span,
@@ -39,7 +52,7 @@ pub(super) fn check<'tcx>(
                         Applicability::Unspecified,
                     );
                 } else {
-                    diag.help(format!("consider using `{}::{}`", sym::NonZero, sym::new_unchecked));
+                    diag.help(format!("consider using `{non_zero_name}::{}`", sym::new_unchecked));
                 }
             },
         );
@@ -51,14 +64,19 @@ pub(super) fn check<'tcx>(
 
 /// Returns how to name the type `name`, which refers to `to_ty`: just `name` if it is in scope in
 /// the enclosing module, or its absolute path through `std` or `core` otherwise.
-fn type_path(cx: &LateContext<'_>, e: &Expr<'_>, to_ty: Ty<'_>, name: &str) -> Option<String> {
+fn type_path<'tcx>(cx: &LateContext<'tcx>, e: &Expr<'_>, to_ty: Ty<'tcx>, name: &str) -> Option<String> {
     let module = cx.tcx.parent_module(e.hir_id).to_local_def_id();
     let in_scope = cx.tcx.module_children_local(module).iter().any(|child| {
         child.ident.name.as_str() == name
             // A name introduced hygienically by a macro is not visible to `e`
             && child.ident.span.normalize_to_macros_2_0().ctxt().is_root()
-            && matches!(child.res, Res::Def(DefKind::Struct, def_id)
-                if to_ty.ty_adt_def().is_some_and(|adt| adt.did() == def_id))
+            && match child.res {
+                Res::Def(DefKind::Struct, def_id) => to_ty.ty_adt_def().is_some_and(|adt| adt.did() == def_id),
+                Res::Def(DefKind::TyAlias, def_id) => {
+                    cx.tcx.type_of(def_id).instantiate_identity().skip_norm_wip() == to_ty
+                },
+                _ => false,
+            }
     });
     if in_scope && !is_shadowed_locally(cx, e, name) {
         Some(name.to_owned())

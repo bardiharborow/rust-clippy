@@ -1009,6 +1009,7 @@ The minimum rust version that the project supports. Defaults to the `rust-versio
 * [`seek_from_current`](https://rust-lang.github.io/rust-clippy/main/index.html#seek_from_current)
 * [`swap_ptr_to_ref`](https://rust-lang.github.io/rust-clippy/main/index.html#swap_ptr_to_ref)
 * [`to_digit_is_some`](https://rust-lang.github.io/rust-clippy/main/index.html#to_digit_is_some)
+* [`transmute_int_to_non_zero`](https://rust-lang.github.io/rust-clippy/main/index.html#transmute_int_to_non_zero)
 * [`transmute_ptr_to_ref`](https://rust-lang.github.io/rust-clippy/main/index.html#transmute_ptr_to_ref)
 * [`tuple_array_conversions`](https://rust-lang.github.io/rust-clippy/main/index.html#tuple_array_conversions)
 * [`type_repetition_in_bounds`](https://rust-lang.github.io/rust-clippy/main/index.html#type_repetition_in_bounds)
