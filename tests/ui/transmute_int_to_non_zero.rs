@@ -1,3 +1,4 @@
+#![feature(decl_macro)]
 #![warn(clippy::transmute_int_to_non_zero)]
 
 use core::num::NonZero;
@@ -140,6 +141,20 @@ mod local_std {
 
     fn f(x: u32) -> ::std::num::NonZero<u32> {
         unsafe { ::std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+}
+
+mod hygiene {
+    macro import() {
+        #[allow(unused_imports)]
+        use std::num::NonZero;
+    }
+    import!();
+
+    fn f(x: u32) -> std::num::NonZero<u32> {
+        // The import from `import!` is not visible here, so the suggestion must use a full path
+        unsafe { std::mem::transmute(x) }
         //~^ transmute_int_to_non_zero
     }
 }

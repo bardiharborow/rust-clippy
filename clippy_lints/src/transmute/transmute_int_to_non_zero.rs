@@ -55,6 +55,8 @@ fn type_path(cx: &LateContext<'_>, e: &Expr<'_>, to_ty: Ty<'_>, name: &str) -> O
     let module = cx.tcx.parent_module(e.hir_id).to_local_def_id();
     let in_scope = cx.tcx.module_children_local(module).iter().any(|child| {
         child.ident.name.as_str() == name
+            // A name introduced hygienically by a macro is not visible to `e`
+            && child.ident.span.normalize_to_macros_2_0().ctxt().is_root()
             && matches!(child.res, Res::Def(DefKind::Struct, def_id)
                 if to_ty.ty_adt_def().is_some_and(|adt| adt.did() == def_id))
     });
