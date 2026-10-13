@@ -57,3 +57,62 @@ fn main() {
     let _: NonZero<i64> = unsafe { NonZero::new_unchecked(int_i64) };
     let _: NonZero<i128> = unsafe { NonZero::new_unchecked(int_i128) };
 }
+
+mod alias {
+    // `NonZero` itself is not in scope here, so the suggestion must use a full path
+    use std::num::NonZeroU32;
+
+    fn f(x: u32) -> NonZeroU32 {
+        unsafe { std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+}
+
+mod glob {
+    use std::num::*;
+
+    fn f(x: u32) -> NonZero<u32> {
+        unsafe { std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+}
+
+mod shadowed_in_block {
+    use std::num::NonZero;
+
+    fn local_item(x: u32) -> NonZero<u32> {
+        // This `NonZero` shadows the import, so the suggestion must use a full path
+        #[allow(dead_code)]
+        struct NonZero;
+
+        unsafe { std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+
+    fn local_import(x: u32) -> NonZero<u32> {
+        #[allow(unused_imports)]
+        use std::{fmt::Debug as NonZero, mem};
+
+        unsafe { mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+
+    fn unrelated_glob(x: u32) -> NonZero<u32> {
+        #[allow(unused_imports)]
+        use std::ops::*;
+
+        unsafe { std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+}
+
+mod shadowed {
+    // This `NonZero` is not the one from `std`, so the suggestion must use a full path
+    #[allow(dead_code)]
+    struct NonZero;
+
+    fn f(x: u32) -> std::num::NonZero<u32> {
+        unsafe { std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+}
