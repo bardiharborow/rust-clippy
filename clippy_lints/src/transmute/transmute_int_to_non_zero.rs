@@ -5,7 +5,7 @@ use clippy_utils::std_or_core;
 use clippy_utils::sugg::Sugg;
 use rustc_errors::Applicability;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::{Expr, Item, ItemKind, Node, StmtKind, UseKind, UseTree};
+use rustc_hir::{Expr, Item, ItemKind, Node, Path, StmtKind, UseKind, UseTree};
 use rustc_lint::LateContext;
 use rustc_middle::ty::{self, Ty};
 use rustc_span::symbol::sym;
@@ -18,6 +18,7 @@ pub(super) fn check<'tcx>(
     from_ty: Ty<'tcx>,
     to_ty: Ty<'tcx>,
     arg: &'tcx Expr<'_>,
+    path: &Path<'_>,
     msrv: Msrv,
 ) -> bool {
     let int_name = match from_ty.kind() {
@@ -31,7 +32,8 @@ pub(super) fn check<'tcx>(
         && from_ty == int_ty
     {
         // Before the generic `NonZero<T>` was stabilized, only the `NonZeroU32` etc. types existed.
-        let non_zero_name = if msrv.meets(cx, msrvs::GENERIC_NON_ZERO) {
+        let generic = msrv.meets(cx, msrvs::GENERIC_NON_ZERO);
+        let non_zero_name = if generic {
             sym::NonZero.to_string()
         } else {
             let (first, rest) = int_name.split_at(1);
@@ -49,10 +51,17 @@ pub(super) fn check<'tcx>(
                 {
                     let mut app = Applicability::Unspecified;
                     let arg = Sugg::hir_with_context(cx, arg, e.span.ctxt(), "..", &mut app);
+                    // The types given to `transmute` explicitly may be all that determines the integer type, so
+                    // keep them for the generic `NonZero::new_unchecked`.
+                    let turbofish = if generic && path.segments.last().is_some_and(|seg| seg.args.is_some()) {
+                        format!("::<{int_ty}>")
+                    } else {
+                        String::new()
+                    };
                     diag.span_suggestion(
                         e.span,
                         "consider using",
-                        format!("{non_zero_path}::{}({arg})", sym::new_unchecked),
+                        format!("{non_zero_path}{turbofish}::{}({arg})", sym::new_unchecked),
                         app,
                     );
                 } else {

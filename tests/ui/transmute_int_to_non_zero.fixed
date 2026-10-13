@@ -57,6 +57,13 @@ fn main() {
     let _: NonZero<i32> = unsafe { NonZero::new_unchecked(int_i32) };
     let _: NonZero<i64> = unsafe { NonZero::new_unchecked(int_i64) };
     let _: NonZero<i128> = unsafe { NonZero::new_unchecked(int_i128) };
+
+    // Only the explicit types given to `transmute` make this a `u32`, so the suggestion must keep them
+    let _ = unsafe { NonZero::<u32>::new_unchecked(5) };
+    //~^ transmute_int_to_non_zero
+    #[allow(clippy::missing_transmute_annotations)]
+    let _ = unsafe { NonZero::<u32>::new_unchecked(5u32) };
+    //~^ transmute_int_to_non_zero
 }
 
 mod alias {
