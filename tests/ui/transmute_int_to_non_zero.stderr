@@ -65,7 +65,7 @@ error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:66:18
    |
 LL |         unsafe { std::mem::transmute(x) }
-   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `std::num::NonZero::new_unchecked(x)`
+   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:75:18
@@ -77,25 +77,25 @@ error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:88:18
    |
 LL |         unsafe { std::mem::transmute(x) }
-   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `std::num::NonZero::new_unchecked(x)`
+   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:96:18
    |
 LL |         unsafe { mem::transmute(x) }
-   |                  ^^^^^^^^^^^^^^^^^ help: consider using: `std::num::NonZero::new_unchecked(x)`
+   |                  ^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:102:18
    |
 LL |         unsafe { std::mem::transmute(x) }
-   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `std::num::NonZero::new_unchecked(x)`
+   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:111:22
    |
 LL |             unsafe { std::mem::transmute(x) }
-   |                      ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `std::num::NonZero::new_unchecked(x)`
+   |                      ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:120:18
@@ -107,7 +107,13 @@ error: transmute from a `u32` to a `NonZero<u32>`
   --> tests/ui/transmute_int_to_non_zero.rs:131:18
    |
 LL |         unsafe { std::mem::transmute(x) }
-   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `std::num::NonZero::new_unchecked(x)`
+   |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
-error: aborting due to 18 previous errors
+error: transmute from a `u32` to a `NonZero<u32>`
+  --> tests/ui/transmute_int_to_non_zero.rs:142:18
+   |
+LL |         unsafe { ::std::mem::transmute(x) }
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
+
+error: aborting due to 19 previous errors
 

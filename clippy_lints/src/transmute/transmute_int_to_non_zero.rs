@@ -50,7 +50,7 @@ pub(super) fn check<'tcx>(
 }
 
 /// Returns how to name the type `name`, which refers to `to_ty`: just `name` if it is in scope in
-/// the enclosing module, or its full path through `std` or `core` otherwise.
+/// the enclosing module, or its absolute path through `std` or `core` otherwise.
 fn type_path(cx: &LateContext<'_>, e: &Expr<'_>, to_ty: Ty<'_>, name: &str) -> Option<String> {
     let module = cx.tcx.parent_module(e.hir_id).to_local_def_id();
     let in_scope = cx.tcx.module_children_local(module).iter().any(|child| {
@@ -61,7 +61,7 @@ fn type_path(cx: &LateContext<'_>, e: &Expr<'_>, to_ty: Ty<'_>, name: &str) -> O
     if in_scope && !is_shadowed_locally(cx, e, name) {
         Some(name.to_owned())
     } else {
-        std_or_core(cx).map(|std_or_core| format!("{std_or_core}::num::{name}"))
+        std_or_core(cx).map(|std_or_core| format!("::{std_or_core}::num::{name}"))
     }
 }
 

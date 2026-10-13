@@ -132,3 +132,14 @@ mod shadowed {
         //~^ transmute_int_to_non_zero
     }
 }
+
+mod local_std {
+    // This `std` is not the crate, so the suggestion must use an absolute path
+    #[allow(dead_code)]
+    mod std {}
+
+    fn f(x: u32) -> ::std::num::NonZero<u32> {
+        unsafe { ::std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+}

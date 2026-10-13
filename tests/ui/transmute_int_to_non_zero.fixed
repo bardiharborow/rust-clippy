@@ -63,7 +63,7 @@ mod alias {
     use std::num::NonZeroU32;
 
     fn f(x: u32) -> NonZeroU32 {
-        unsafe { std::num::NonZero::new_unchecked(x) }
+        unsafe { ::std::num::NonZero::new_unchecked(x) }
         //~^ transmute_int_to_non_zero
     }
 }
@@ -85,7 +85,7 @@ mod shadowed_in_block {
         #[allow(dead_code)]
         struct NonZero;
 
-        unsafe { std::num::NonZero::new_unchecked(x) }
+        unsafe { ::std::num::NonZero::new_unchecked(x) }
         //~^ transmute_int_to_non_zero
     }
 
@@ -93,13 +93,13 @@ mod shadowed_in_block {
         #[allow(unused_imports)]
         use std::{fmt::Debug as NonZero, mem};
 
-        unsafe { std::num::NonZero::new_unchecked(x) }
+        unsafe { ::std::num::NonZero::new_unchecked(x) }
         //~^ transmute_int_to_non_zero
     }
 
     fn generic_param<NonZero>(x: u32, _: NonZero) -> std::num::NonZero<u32> {
         // The `NonZero` type parameter shadows the import, so the suggestion must use a full path
-        unsafe { std::num::NonZero::new_unchecked(x) }
+        unsafe { ::std::num::NonZero::new_unchecked(x) }
         //~^ transmute_int_to_non_zero
     }
 
@@ -108,7 +108,7 @@ mod shadowed_in_block {
     impl<NonZero> Wrapper<NonZero> {
         fn f(x: u32) -> std::num::NonZero<u32> {
             // The `NonZero` type parameter of the `impl` also shadows the import
-            unsafe { std::num::NonZero::new_unchecked(x) }
+            unsafe { ::std::num::NonZero::new_unchecked(x) }
             //~^ transmute_int_to_non_zero
         }
     }
@@ -128,7 +128,18 @@ mod shadowed {
     struct NonZero;
 
     fn f(x: u32) -> std::num::NonZero<u32> {
-        unsafe { std::num::NonZero::new_unchecked(x) }
+        unsafe { ::std::num::NonZero::new_unchecked(x) }
+        //~^ transmute_int_to_non_zero
+    }
+}
+
+mod local_std {
+    // This `std` is not the crate, so the suggestion must use an absolute path
+    #[allow(dead_code)]
+    mod std {}
+
+    fn f(x: u32) -> ::std::num::NonZero<u32> {
+        unsafe { ::std::num::NonZero::new_unchecked(x) }
         //~^ transmute_int_to_non_zero
     }
 }
