@@ -43,13 +43,17 @@ pub(super) fn check<'tcx>(
             e.span,
             format!("transmute from a `{from_ty}` to a `{}<{int_ty}>`", sym::NonZero),
             |diag| {
-                if let Some(non_zero_path) = type_path(cx, e, to_ty, &non_zero_name) {
-                    let arg = Sugg::hir(cx, arg, "..");
+                // A suggestion inside a macro body would also change every other expansion of the macro
+                if !e.span.from_expansion()
+                    && let Some(non_zero_path) = type_path(cx, e, to_ty, &non_zero_name)
+                {
+                    let mut app = Applicability::Unspecified;
+                    let arg = Sugg::hir_with_context(cx, arg, e.span.ctxt(), "..", &mut app);
                     diag.span_suggestion(
                         e.span,
                         "consider using",
                         format!("{non_zero_path}::{}({arg})", sym::new_unchecked),
-                        Applicability::Unspecified,
+                        app,
                     );
                 } else {
                     diag.help(format!("consider using `{non_zero_name}::{}`", sym::new_unchecked));

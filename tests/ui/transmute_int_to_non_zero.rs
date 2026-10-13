@@ -159,6 +159,21 @@ mod msrv_generic_non_zero {
     }
 }
 
+mod macros {
+    use std::num::NonZero;
+
+    macro_rules! five {
+        () => {
+            5u32
+        };
+    }
+
+    fn macro_arg() -> NonZero<u32> {
+        unsafe { std::mem::transmute(five!()) }
+        //~^ transmute_int_to_non_zero
+    }
+}
+
 mod local_std {
     // This `std` is not the crate, so the suggestion must use an absolute path
     #[allow(dead_code)]

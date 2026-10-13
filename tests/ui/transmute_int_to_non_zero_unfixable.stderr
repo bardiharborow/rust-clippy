@@ -1,0 +1,17 @@
+error: transmute from a `u32` to a `NonZero<u32>`
+  --> tests/ui/transmute_int_to_non_zero_unfixable.rs:8:18
+   |
+LL | macro_rules! to_non_zero {
+LL |     ($x:expr) => {
+LL |         unsafe { std::mem::transmute($x) }
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^
+...
+LL |     to_non_zero!(x)
+   |     --------------- in this macro invocation
+   |
+   = help: consider using `NonZero::new_unchecked`
+   = note: `-D clippy::transmute-int-to-non-zero` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::transmute_int_to_non_zero)]`
+
+error: aborting due to 1 previous error
+

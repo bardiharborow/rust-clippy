@@ -134,16 +134,22 @@ LL |         unsafe { std::mem::transmute(x) }
    |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
-  --> tests/ui/transmute_int_to_non_zero.rs:168:18
+  --> tests/ui/transmute_int_to_non_zero.rs:172:18
+   |
+LL |         unsafe { std::mem::transmute(five!()) }
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `NonZero::new_unchecked(five!())`
+
+error: transmute from a `u32` to a `NonZero<u32>`
+  --> tests/ui/transmute_int_to_non_zero.rs:183:18
    |
 LL |         unsafe { ::std::mem::transmute(x) }
    |                  ^^^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
 error: transmute from a `u32` to a `NonZero<u32>`
-  --> tests/ui/transmute_int_to_non_zero.rs:182:18
+  --> tests/ui/transmute_int_to_non_zero.rs:197:18
    |
 LL |         unsafe { std::mem::transmute(x) }
    |                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using: `::std::num::NonZero::new_unchecked(x)`
 
-error: aborting due to 24 previous errors
+error: aborting due to 25 previous errors
 
