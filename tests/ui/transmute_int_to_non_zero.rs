@@ -97,6 +97,22 @@ mod shadowed_in_block {
         //~^ transmute_int_to_non_zero
     }
 
+    fn generic_param<NonZero>(x: u32, _: NonZero) -> std::num::NonZero<u32> {
+        // The `NonZero` type parameter shadows the import, so the suggestion must use a full path
+        unsafe { std::mem::transmute(x) }
+        //~^ transmute_int_to_non_zero
+    }
+
+    struct Wrapper<T>(T);
+
+    impl<NonZero> Wrapper<NonZero> {
+        fn f(x: u32) -> std::num::NonZero<u32> {
+            // The `NonZero` type parameter of the `impl` also shadows the import
+            unsafe { std::mem::transmute(x) }
+            //~^ transmute_int_to_non_zero
+        }
+    }
+
     fn unrelated_glob(x: u32) -> NonZero<u32> {
         #[allow(unused_imports)]
         use std::ops::*;

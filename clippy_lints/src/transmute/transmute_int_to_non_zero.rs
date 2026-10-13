@@ -58,16 +58,16 @@ fn type_path(cx: &LateContext<'_>, e: &Expr<'_>, to_ty: Ty<'_>, name: &str) -> O
             && matches!(child.res, Res::Def(DefKind::Struct, def_id)
                 if to_ty.ty_adt_def().is_some_and(|adt| adt.did() == def_id))
     });
-    if in_scope && !is_shadowed_in_block(cx, e, name) {
+    if in_scope && !is_shadowed_locally(cx, e, name) {
         Some(name.to_owned())
     } else {
         std_or_core(cx).map(|std_or_core| format!("{std_or_core}::num::{name}"))
     }
 }
 
-/// Checks whether an item or import in a block around `e` might bind `name`, which would shadow
-/// what the enclosing module binds it to.
-fn is_shadowed_in_block(cx: &LateContext<'_>, e: &Expr<'_>, name: &str) -> bool {
+/// Checks whether an item or import in a block around `e`, or a generic parameter of an item around
+/// `e`, might bind `name`, which would shadow what the enclosing module binds it to.
+fn is_shadowed_locally(cx: &LateContext<'_>, e: &Expr<'_>, name: &str) -> bool {
     cx.tcx
         .hir_parent_iter(e.hir_id)
         .take_while(|(_, node)| {
@@ -80,7 +80,12 @@ fn is_shadowed_in_block(cx: &LateContext<'_>, e: &Expr<'_>, name: &str) -> bool 
             )
         })
         .any(|(_, node)| {
-            matches!(node, Node::Block(block) if block.stmts.iter().any(|stmt| {
+            node.generics().is_some_and(|generics| {
+                generics
+                    .params
+                    .iter()
+                    .any(|param| param.name.ident().name.as_str() == name)
+            }) || matches!(node, Node::Block(block) if block.stmts.iter().any(|stmt| {
                 matches!(stmt.kind, StmtKind::Item(item_id) if item_binds(cx, cx.tcx.hir_item(item_id), name))
             }))
         })
