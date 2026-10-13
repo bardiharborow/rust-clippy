@@ -49,7 +49,7 @@ pub(super) fn check<'tcx>(
                 if !e.span.from_expansion()
                     && let Some(non_zero_path) = type_path(cx, e, to_ty, &non_zero_name)
                 {
-                    let mut app = Applicability::Unspecified;
+                    let mut app = Applicability::MachineApplicable;
                     let arg = Sugg::hir_with_context(cx, arg, e.span.ctxt(), "..", &mut app);
                     // The types given to `transmute` explicitly may be all that determines the integer type, so
                     // keep them for the generic `NonZero::new_unchecked`.
