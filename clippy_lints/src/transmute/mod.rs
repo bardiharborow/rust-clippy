@@ -221,12 +221,12 @@ declare_clippy_lint! {
     /// ### Example
     /// ```no_run
     /// # use core::num::NonZero;
-    /// let _: NonZero<u32> = unsafe { std::mem::transmute(123) };
+    /// let _: NonZero<u32> = unsafe { std::mem::transmute(123u32) };
     /// ```
     /// Use instead:
     /// ```no_run
     /// # use core::num::NonZero;
-    /// let _: NonZero<u32> = unsafe { NonZero::new_unchecked(123) };
+    /// let _: NonZero<u32> = unsafe { NonZero::new_unchecked(123u32) };
     /// ```
     #[clippy::version = "1.69.0"]
     pub TRANSMUTE_INT_TO_NON_ZERO,
